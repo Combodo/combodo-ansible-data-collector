@@ -1,0 +1,39 @@
+#
+# @copyright   Copyright (C) 2023 Combodo SARL
+# @license     http://opensource.org/licenses/AGPL-3.0
+#
+# This playbook...
+#
+# Output parameters:
+#  - ...
+#
+---
+- name: Store gathered facts in files for later processing
+  hosts: all, localhost
+
+  vars:
+    # Path to the working directories as seen from the <collector>/collectors/src/playbooks directory
+    raw_directory: ../../../data/facts/raw
+    csv_directory: ../../../data/facts/csv
+
+  tasks:
+    - name: Make sure that raw directory exists
+      ansible.builtin.file:
+        path: "{{ raw_directory }}"
+        state: directory
+      delegate_to: localhost
+      run_once: true
+
+    - name: Dump facts on a per host basis in the raw directory
+      ansible.builtin.copy:
+        content: '{"ansible_facts": {{ ansible_facts | to_json }}}'
+        dest: "{{ raw_directory }}/{{ inventory_hostname }}"
+      delegate_to: localhost
+
+    - name: Make sure that csv directory exists
+      ansible.builtin.file:
+        path: "{{ csv_directory }}"
+        state: directory
+      delegate_to: localhost
+      run_once: true
+

@@ -1,0 +1,43 @@
+#
+# @copyright   Copyright (C) 2023 Combodo SARL
+# @license     http://opensource.org/licenses/AGPL-3.0
+#
+# This task adds a line to the csv file being build for the current collection.
+#
+# Input parameters:
+#  - hostname: Host to consider. The file containing its facts has the same name.
+#  - primary_key_values: list of ansible attributes to use to build the primary key
+#  - ansible_host_attributes: list of ansible attributes to consider from host inventory
+#  - csv_file: file where the relevant host attributes will be appended in a new line
+#
+# Output parameters:
+#
+---
+- name: Import file content into variable
+  ansible.builtin.set_fact:
+    jsondata: "{{ lookup('file', file) | from_json }}"
+  vars:
+    file: "{{ raw_directory }}/{{ hostname }}"
+
+- name: Get primary key
+  ansible.builtin.set_fact:
+    primary_key_values: "{{ primary_key_values + [jsondata | community.general.json_query(primary_query)] }}"
+  loop: "{{ primary_key }}"
+  loop_control:
+    loop_var: primary_query
+  vars:
+    primary_key_values: []
+
+- name: Get attributes
+  ansible.builtin.set_fact:
+    attribute_values: "{{ attribute_values + [jsondata | community.general.json_query(host_query)] }}"
+  loop: "{{ host_attributes }}"
+  loop_control:
+    loop_var: host_query
+  vars:
+    attribute_values: []
+
+- name: Apppend result to output file
+  ansible.builtin.lineinfile:
+    path: "{{ csv_file }}"
+    line: "{{ primary_key_values | join('_') }},{{ attribute_values | join(',') }}"
