@@ -16,11 +16,6 @@
 - name: Store gathered facts in files for later processing
   hosts: all, localhost
 
-  vars:
-    # Path to the working directories as seen from the <collector>/collectors/src/playbooks directory
-    raw_directory: ../../../data/facts/raw
-    csv_directory: ../../../data/facts/csv
-
   tasks:
     - name: Make sure that raw directory exists
       ansible.builtin.file:

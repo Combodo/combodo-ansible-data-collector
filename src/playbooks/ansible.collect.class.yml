@@ -20,21 +20,8 @@
   gather_facts: false
 
   vars:
-    # Path to the working directories as seen from the <collector>/collectors/src/playbooks directory
-    raw_directory: ../../../data/facts/raw
-    csv_directory: ../../../data/facts/csv
     # Name of the output file
-    itop_class: osversion
     csv_file: "{{ csv_directory }}/ansible.{{ itop_class }}.csv"
-    itop_attributes:
-      - os_version
-      - os_family
-    primary_key:
-      - ansible_distribution
-      - ansible_distribution_version
-    host_attributes:
-      - ansible_distribution
-      - ansible_distribution_version
 
   tasks:
     - name: Create csv file
