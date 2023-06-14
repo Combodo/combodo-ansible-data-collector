@@ -15,10 +15,9 @@
 #
 ---
 - name: Import file content into variable
-  ansible.builtin.set_fact:
-    jsondata: "{{ lookup('file', file) | from_json }}"
-  vars:
+  ansible.builtin.include_vars:
     file: "{{ raw_directory }}/{{ hostname }}"
+    name: jsondata
 
 - name: Get line
   block:

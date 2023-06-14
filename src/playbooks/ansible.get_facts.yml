@@ -26,7 +26,7 @@
 
     - name: Dump facts on a per host basis in the raw directory
       ansible.builtin.copy:
-        content: '{"ansible_facts": {{ ansible_facts | to_json }}}'
+        content: '{{ ansible_facts }}'
         dest: "{{ raw_directory }}/{{ inventory_hostname }}"
       delegate_to: localhost
 
