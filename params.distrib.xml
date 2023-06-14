@@ -1,10 +1,131 @@
 <?xml version="1.0" encoding="UTF-8"?><!-- Default values for parameters. Do NOT alter this file, use params.local.xml instead -->
 <parameters>
   <!-- iTop Parameters -->
-	<itop_url>http://myitop.com</itop_url>
+  <itop_url>http://myitop.com</itop_url>
   <itop_login>admin</itop_login>
   <itop_password>admin</itop_password>
 
+  <!-- LogicalInterface -->
+  <ansiblelogicalinerfacecollector>
+    <ansible_selector>
+      <virtualization_role>guest</virtualization_role>
+    </ansible_selector>
+    <primary_key type="array">
+      <ansible_attribute>device</ansible_attribute>
+      <ansible_attribute>hostname</ansible_attribute>
+    </primary_key>
+    <fields>
+      <macaddress>macaddress</macaddress>
+      <name>device</name>
+      <speed>speed</speed>
+      <virtualmachine_id>hostname</virtualmachine_id>
+    </fields>
+  </ansiblelogicalinerfacecollector>
 
+  <!-- OS Family -->
+  <ansibleosfamilycollector>
+    <primary_key type="array">
+      <ansible_attribute>distribution</ansible_attribute>
+    </primary_key>
+    <fields>
+      <name>distribution</name>
+    </fields>
+  </ansibleosfamilycollector>
+
+  <!-- OS Version -->
+  <ansibleosversioncollector>
+    <primary_key type="array">
+      <ansible_attribute>distribution</ansible_attribute>
+      <ansible_attribute>distribution_version</ansible_attribute>
+    </primary_key>
+    <fields>
+      <name>distribution_version</name>
+      <osfamily_id>distribution</osfamily_id>
+    </fields>
+  </ansibleosversioncollector>
+
+  <!-- VirtualMachine -->
+  <ansiblevirtualmachinecollector>
+    <ansible_selector>
+      <virtualization_role>guest</virtualization_role>
+    </ansible_selector>
+    <primary_key type="array">
+      <ansible_attribute>hostname</ansible_attribute>
+    </primary_key>
+    <fields>
+      <cpu>processor_vcpus</cpu>
+      <description>lsb.description</description>
+      <managementip>default_ipv4.address</managementip>
+      <name>hostname</name>
+      <osfamily_id>distribution</osfamily_id>
+      <osversion_id>distribution_version</osversion_id>
+      <ram>memtotal_mb</ram>
+    </fields>
+  </ansiblevirtualmachinecollector>
+
+  <!-- Default values -->
+  <default_org_id>Demo</default_org_id>
+
+  <!-- Class collection sequence -->
+  <collectors_launch_sequence type="array">
+    <!-- OS Family -->
+    <collector>
+      <name>AnsibleOSFamilyCollector</name>
+      <enable>yes</enable>
+      <rank>1</rank>
+    </collector>
+    <!-- OS Version -->
+    <collector>
+      <name>AnsibleOSVersionCollector</name>
+      <enable>yes</enable>
+      <rank>2</rank>
+    </collector>
+    <!-- VirtualMachine -->
+    <collector>
+      <name>AnsibleVirtualMachineCollector</name>
+      <enable>yes</enable>
+      <rank>3</rank>
+    </collector>
+  </collectors_launch_sequence>
+
+  <!-- Synchronization parameters -->
+  <contact_to_notify></contact_to_notify>
+  <synchro_user></synchro_user>
+  <json_placeholders type="hash">
+    <prefix>Ansible</prefix>
+    <full_load_interval>604800</full_load_interval><!-- 7 days (in seconds): 7*24*60*60 -->
+    <synchro_status>production</synchro_status>
+  </json_placeholders>
+
+  <!-- Mapping tables -->
+  <brand_mapping type="array">
+    <!-- Syntax /pattern/replacement where:
+      any delimiter can be used (not only /) but the delimiter cannot be present in the "replacement" string
+      pattern is a RegExpr pattern
+      replacement is a sprintf string in which:
+          %1$s will be replaced by the whole matched text,
+          %2$s will be replaced by the first match group, if any group is defined in the RegExpr
+          %3$s will be replaced by the second matched group, etc...
+    -->
+    <pattern>/IBM/IBM</pattern>
+    <pattern>/Hewlett Packard/Hewlett-Packard</pattern>
+    <pattern>/Hewlett-Packard/Hewlett-Packard</pattern>
+    <pattern>/Dell/Dell</pattern>
+    <pattern>/.*/%1$s</pattern>
+  </brand_mapping>
+  <model_mapping type="array">
+    <pattern>/.*/%1$s</pattern>
+  </model_mapping>
+  <os_family_mapping type="array">
+    <pattern>/Ubuntu/Linux</pattern>
+    <pattern>/RedHat/Linux</pattern>
+    <pattern>/Debian/Linux</pattern>
+    <pattern>/Linux/Linux</pattern>
+    <pattern>/Windows/Windows</pattern>
+    <pattern>/.*/Other</pattern>
+  </os_family_mapping>
+  <os_version_mapping type="array">
+    <pattern>/.*/%1$s</pattern>
+  </os_version_mapping>
 
 </parameters>
