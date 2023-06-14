@@ -5,16 +5,16 @@
 # This playbook...
 #
 # Input parameters:
-#  - itop_class:
-#  - itop_attributes:
-#  - primary_key:
-#  - host_attributes:
+#  - itop_class: iTop class of object that is presently collected.
+#  - itop_attributes: Array containing the iTop attributes that should be collected for that class.
+#  - primary_key: Array containing Ansible attributes used to build the primary key
+#  - host_attributes: Array of Ansible attributes to lookup in the raw file and to add to the csv output.
 #
 # Output parameters:
-#  - csv_file:
+#  - csv_file: CSV file containing all object belonging to the itop_class to be synchronized
 #
 ---
-- name: xxx
+- name: Build CSV file containing all objects of a given class to be synchronized within iTop
   hosts: all, localhost
 
   gather_facts: false

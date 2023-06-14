@@ -6,11 +6,12 @@
 #
 # Input parameters:
 #  - hostname: Host to consider. The file containing its facts has the same name.
-#  - primary_key_values: list of ansible attributes to use to build the primary key
-#  - ansible_host_attributes: list of ansible attributes to consider from host inventory
-#  - csv_file: file where the relevant host attributes will be appended in a new line
+#  - primary_key_values: List of Ansible attributes to use to build the primary key
+#  - ansible_host_attributes: List of Ansible attributes to consider from host inventory
+#  - csv_file: File where the relevant host attributes will be appended in a new line
 #
 # Output parameters:
+#  - Line appended to the csv_file with host attributes extracted from Ansible
 #
 ---
 - name: Import file content into variable

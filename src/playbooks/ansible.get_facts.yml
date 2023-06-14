@@ -2,10 +2,15 @@
 # @copyright   Copyright (C) 2023 Combodo SARL
 # @license     http://opensource.org/licenses/AGPL-3.0
 #
-# This playbook...
+# This playbook initialises Ansible related data directories and stores the facts collected by Ansible in a file. On file
+# per host is created.
+#
+# Input parameters:
+#  - raw_directory: Directory where the files holding the facts will be stored.
+#  - csv_directory: Directory where the csv files acting as input for the collector will be stored.
 #
 # Output parameters:
-#  - ...
+#  - One file per host under the raw_directory containing host attributes extracted by Ansible
 #
 ---
 - name: Store gathered facts in files for later processing
