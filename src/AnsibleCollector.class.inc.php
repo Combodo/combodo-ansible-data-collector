@@ -36,6 +36,14 @@ class AnsibleCollector extends Collector
 		$bConfigIsCorrect = true;
 		$aClassConfig = Utils::GetConfigurationValue(strtolower(get_class($this)));
 		if (is_array($aClassConfig)) {
+			// Check if class is a link
+			if (array_key_exists('is_link', $aClassConfig)) {
+				$sIsLink = 'true';
+			} else {
+				$sIsLink = 'false';
+			}
+
+			// Get list of attributes to build the primary key
 			if (array_key_exists('primary_key', $aClassConfig)) {
 				$aPrimaryKey = $aClassConfig['primary_key'];
 				if (!is_array($aPrimaryKey)) {
@@ -44,19 +52,28 @@ class AnsibleCollector extends Collector
 				}
 			}
 
+			// Get the list of iTop, host and default attributes
 			if (array_key_exists('fields', $aClassConfig)) {
 				$aFields = $aClassConfig['fields'];
 				if (!is_array($aFields)) {
 					Utils::Log(LOG_ERR, 'Fields section configuration is not correct. Please see documentation.');
 					$bConfigIsCorrect = false;
 				} else {
+					$aItopAttributes = [];
+					$aHostAttributes = [];
+					$aDefaultAttributes = [];
 					foreach ($aFields as $key => $value) {
 						$aItopAttributes[] = $key;
-						$aHostAttributes[] = $value;
+						if ($value == '') {
+							$aDefaultAttributes[] = Utils::GetConfigurationValue('default_'.$key, '');
+						} else {
+							$aHostAttributes[] = $value;
+						}
 					}
 				}
 			}
 
+			// Build selector to only work on relevant host files for the class
 			$sSelector = 'true';
 			if (array_key_exists('ansible_selector', $aClassConfig)) {
 				$aSelector = $aClassConfig['ansible_selector'];
@@ -64,10 +81,10 @@ class AnsibleCollector extends Collector
 					$bFirstLoop = true;
 					foreach ($aSelector as $key => $value) {
 						if ($bFirstLoop) {
-							$sSelector = $key.' == '.$value;
+							$sSelector = 'jsondata.'.$key.' == "'.$value.'"';
 							$bFirstLoop = false;
 						} else {
-							$sSelector .= ' and '.$key.' == '.$value;
+							$sSelector .= ' and jsondata.'.$key.' == '.$value;
 						}
 					}
 				}
@@ -79,9 +96,11 @@ class AnsibleCollector extends Collector
 					'raw_directory' => $this->oCollectionPlan->GetDirectory('raw'),
 					'csv_directory' => $this->oCollectionPlan->GetDirectory('csv'),
 					'itop_class' => $this->sCIClass,
+					'is_link' => $sIsLink,
 					'itop_attributes' => $aItopAttributes,
 					'primary_key' => $aPrimaryKey,
 					'host_attributes' => $aHostAttributes,
+					'default_attributes' => $aDefaultAttributes,
 					'collect_condition' => $sSelector,
 				];
 			}
