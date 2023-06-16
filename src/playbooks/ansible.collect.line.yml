@@ -30,7 +30,7 @@
       vars:
         primary_key_values: []
 
-    - name: Get attributes
+    - name: Get host attributes
       ansible.builtin.set_fact:
         attribute_values: "{{ attribute_values + [jsondata | community.general.json_query(host_query)] }}"
       loop: "{{ host_attributes }}"
@@ -39,12 +39,28 @@
       vars:
         attribute_values: []
 
-    - name: Apppend result to output file
+    - name: Get default attributes
+      ansible.builtin.set_fact:
+        default_values: "{{ default_values + [default_query] }}"
+      loop: "{{ default_attributes }}"
+      loop_control:
+        loop_var: default_query
+      vars:
+        default_values: []
+
+    - name: Apppend result to output file with default values
+      ansible.builtin.lineinfile:
+        path: "{{ csv_file }}"
+        line: "{{ primary_key_values | join('_') }},{{ attribute_values | join(',') }},{{ default_values | join(',') }}"
+      when: default_values is defined
+
+    - name: Apppend result to output file with no default values
       ansible.builtin.lineinfile:
         path: "{{ csv_file }}"
         line: "{{ primary_key_values | join('_') }},{{ attribute_values | join(',') }}"
+      when: default_values is undefined
 
-  when: collect_condition | bool
+  when: (collect_condition | bool == true) or (collect_condition)
   rescue:
     - name: Print when collection is not met
       ansible.builtin.debug:
