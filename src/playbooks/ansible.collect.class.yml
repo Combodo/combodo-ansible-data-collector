@@ -34,3 +34,5 @@
       vars:
         hostname: "{{ item }}"
       loop: "{{ play_hosts }}"
+      when: is_link == "false"
+
