@@ -7,7 +7,8 @@
 
   <!-- LogicalInterface -->
   <ansiblelogicalinerfacecollector>
-    <ansible_selector>
+    <is_link>true</is_link>
+    <ansible_selector type="array">
       <virtualization_role>guest</virtualization_role>
     </ansible_selector>
     <primary_key type="array">
@@ -60,6 +61,7 @@
       <osfamily_id>distribution</osfamily_id>
       <osversion_id>distribution_version</osversion_id>
       <ram>memtotal_mb</ram>
+      <org_id></org_id>
     </fields>
   </ansiblevirtualmachinecollector>
 
