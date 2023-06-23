@@ -15,19 +15,24 @@ class AnsibleCollectionPlan extends CollectionPlan
 	public function Init(): void
 	{
 		parent::Init();
+		$sGatherFacts = Utils::GetConfigurationValue('gather_facts', 'yes');
 		$this->sRawDirectory = APPROOT.Utils::GetConfigurationValue('raw_directory', 'data/facts/raw');
 		$this->sCsvDirectory = APPROOT.Utils::GetConfigurationValue('csv_directory', 'data/facts/csv');
 
-		// Gather facts
-		Utils::Log(LOG_INFO, 'Gather facts and store them in files (one per host) under directory '.$this->sRawDirectory.'.');
-		$aExtraVars = ['raw_directory' => $this->sRawDirectory, 'csv_directory' => $this->sCsvDirectory];
-		$sExtraVars = json_encode($aExtraVars);
-		$this->sAnsibleCmd = 'ansible-playbook '.APPROOT.'collectors/src/playbooks/ansible.get_facts.yml '.'--extra-vars \''.$sExtraVars.'\'';
-		exec($this->sAnsibleCmd, $aOutput, $iResultCode);
-		if ($iResultCode) {
-			Utils::Log(LOG_ERR, "Ansible fact gathering process failed.");
-			foreach ($aOutput as $sOutputLine) {
-				Utils::Log(LOG_DEBUG, $sOutputLine."\n");
+		if ($sGatherFacts == 'yes') {
+			// Gather facts
+			Utils::Log(LOG_INFO, 'Gather facts and store them in files (one per host) under directory '.$this->sRawDirectory.'.');
+			$aExtraVars = ['raw_directory' => $this->sRawDirectory, 'csv_directory' => $this->sCsvDirectory];
+			$sExtraVars = json_encode($aExtraVars);
+			$sAnsibleCmd = 'ansible-playbook '.APPROOT.'collectors/src/playbooks/ansible.get_facts.yml '.'--extra-vars \''.$sExtraVars.'\'';
+			Utils::Log(LOG_DEBUG, '['.get_class($this).'] The following Ansible command will be executed to gather facts:');
+			Utils::Log(LOG_DEBUG, "     ".$sAnsibleCmd);
+			exec($sAnsibleCmd, $aOutput, $iResultCode);
+			if ($iResultCode) {
+				Utils::Log(LOG_ERR, "Ansible fact gathering process failed.");
+				foreach ($aOutput as $sOutputLine) {
+					Utils::Log(LOG_DEBUG, $sOutputLine."\n");
+				}
 			}
 		}
 	}
