@@ -5,12 +5,32 @@
   <itop_login>admin</itop_login>
   <itop_password>admin</itop_password>
 
+  <!-- Ansible Parameters -->
+  <gather_facts>no</gather_facts>
+  <raw_directory>data/facts/raw</raw_directory>
+  <csv_directory>data/facts/csv</csv_directory>
+
+  <!-- Brand -->
+  <ansiblebrandcollector>
+    <csv_file>data/facts/csv/AnsibleBrandCollector.csv</csv_file>
+    <has_header>yes</has_header>
+    <collect_condition>
+      <virtualization_role>host</virtualization_role>
+    </collect_condition>
+    <primary_key type="array">
+      <ansible_attribute>chassis_vendor</ansible_attribute>
+    </primary_key>
+    <fields>
+      <name>chassis_vendor</name>
+    </fields>
+  </ansiblebrandcollector>
+
   <!-- LogicalInterface -->
   <ansiblelogicalinerfacecollector>
     <is_link>true</is_link>
-    <ansible_selector type="array">
+    <collect_condition>
       <virtualization_role>guest</virtualization_role>
-    </ansible_selector>
+    </collect_condition>
     <primary_key type="array">
       <ansible_attribute>device</ansible_attribute>
       <ansible_attribute>hostname</ansible_attribute>
@@ -23,8 +43,30 @@
     </fields>
   </ansiblelogicalinerfacecollector>
 
+  <!-- Model -->
+  <ansiblemodelcollector>
+    <csv_file>data/facts/csv/AnsibleModelCollector.csv</csv_file>
+    <has_header>yes</has_header>
+    <collect_condition>
+      <virtualization_role>host</virtualization_role>
+    </collect_condition>
+    <primary_key type="array">
+      <ansible_attribute>chassis_vendor</ansible_attribute>
+      <ansible_attribute>product_name</ansible_attribute>
+    </primary_key>
+    <fields>
+      <name>product_name</name>
+      <brand_id>chassis_vendor</brand_id>
+    </fields>
+    <defaults>
+      <type>Server</type>
+    </defaults>
+  </ansiblemodelcollector>
+
   <!-- OS Family -->
   <ansibleosfamilycollector>
+    <csv_file>data/facts/csv/AnsibleOSFamilyCollector.csv</csv_file>
+    <has_header>yes</has_header>
     <primary_key type="array">
       <ansible_attribute>distribution</ansible_attribute>
     </primary_key>
@@ -35,6 +77,8 @@
 
   <!-- OS Version -->
   <ansibleosversioncollector>
+    <csv_file>data/facts/csv/AnsibleOSVersionCollector.csv</csv_file>
+    <has_header>yes</has_header>
     <primary_key type="array">
       <ansible_attribute>distribution</ansible_attribute>
       <ansible_attribute>distribution_version</ansible_attribute>
@@ -45,11 +89,41 @@
     </fields>
   </ansibleosversioncollector>
 
+  <!-- Server -->
+  <ansibleservercollector>
+    <csv_file>data/facts/csv/AnsibleServerCollector.csv</csv_file>
+    <has_header>yes</has_header>
+    <collect_condition>
+      <virtualization_role>host</virtualization_role>
+    </collect_condition>
+    <primary_key type="array">
+      <ansible_attribute>hostname</ansible_attribute>
+    </primary_key>
+    <fields>
+      <brand_id>chassis_vendor</brand_id>
+      <cpu>processor_vcpus</cpu>
+      <description>lsb.description</description>
+      <managementip>default_ipv4.address</managementip>
+      <model_id>product_name</model_id>
+      <name>hostname</name>
+      <osfamily_id>distribution</osfamily_id>
+      <osversion_id>distribution_version</osversion_id>
+      <ram>memtotal_mb</ram>
+      <serialnumber>product_serial</serialnumber>
+    </fields>
+    <defaults>
+      <org_id>Demo</org_id>
+      <status>production</status>
+    </defaults>
+  </ansibleservercollector>
+
   <!-- VirtualMachine -->
   <ansiblevirtualmachinecollector>
-    <ansible_selector>
+    <csv_file>data/facts/csv/AnsibleVirtualMachineCollector.csv</csv_file>
+    <has_header>yes</has_header>
+    <collect_condition>
       <virtualization_role>guest</virtualization_role>
-    </ansible_selector>
+    </collect_condition>
     <primary_key type="array">
       <ansible_attribute>hostname</ansible_attribute>
     </primary_key>
@@ -61,32 +135,50 @@
       <osfamily_id>distribution</osfamily_id>
       <osversion_id>distribution_version</osversion_id>
       <ram>memtotal_mb</ram>
-      <org_id></org_id>
     </fields>
+    <defaults>
+      <org_id>Demo</org_id>
+      <status>production</status>
+    </defaults>
   </ansiblevirtualmachinecollector>
-
-  <!-- Default values -->
-  <default_org_id>Demo</default_org_id>
 
   <!-- Class collection sequence -->
   <collectors_launch_sequence type="array">
+    <!-- Brand -->
+    <collector>
+      <name>AnsibleBrandCollector</name>
+      <enable>yes</enable>
+      <rank>1</rank>
+    </collector>
+    <!-- Model -->
+    <collector>
+      <name>AnsibleModelCollector</name>
+      <enable>yes</enable>
+      <rank>2</rank>
+    </collector>
     <!-- OS Family -->
     <collector>
       <name>AnsibleOSFamilyCollector</name>
       <enable>yes</enable>
-      <rank>1</rank>
+      <rank>3</rank>
     </collector>
     <!-- OS Version -->
     <collector>
       <name>AnsibleOSVersionCollector</name>
       <enable>yes</enable>
-      <rank>2</rank>
+      <rank>4</rank>
+    </collector>
+    <!-- Server -->
+    <collector>
+      <name>AnsibleServerCollector</name>
+      <enable>yes</enable>
+      <rank>5</rank>
     </collector>
     <!-- VirtualMachine -->
     <collector>
       <name>AnsibleVirtualMachineCollector</name>
       <enable>yes</enable>
-      <rank>3</rank>
+      <rank>6</rank>
     </collector>
   </collectors_launch_sequence>
 
