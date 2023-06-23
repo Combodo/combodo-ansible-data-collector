@@ -4,7 +4,7 @@
  * @license     http://opensource.org/licenses/AGPL-3.0
  */
 
-class AnsibleCollector extends Collector
+class AnsibleCollector extends CSVCollector
 {
 	protected $idx;
 	protected $oCollectionPlan;
@@ -47,7 +47,7 @@ class AnsibleCollector extends Collector
 			if (array_key_exists('primary_key', $aClassConfig)) {
 				$aPrimaryKey = $aClassConfig['primary_key'];
 				if (!is_array($aPrimaryKey)) {
-					Utils::Log(LOG_ERR, 'Primary_key section configuration is not correct. Please see documentation.');
+					Utils::Log(LOG_ERR, '['.get_class($this).'] Primary_key section configuration is not correct. Please see documentation.');
 					$bConfigIsCorrect = false;
 				}
 			}
@@ -56,7 +56,7 @@ class AnsibleCollector extends Collector
 			if (array_key_exists('fields', $aClassConfig)) {
 				$aFields = $aClassConfig['fields'];
 				if (!is_array($aFields)) {
-					Utils::Log(LOG_ERR, 'Fields section configuration is not correct. Please see documentation.');
+					Utils::Log(LOG_ERR, '['.get_class($this).'] Fields section configuration is not correct. Please see documentation.');
 					$bConfigIsCorrect = false;
 				} else {
 					$aItopAttributes = [];
@@ -74,38 +74,41 @@ class AnsibleCollector extends Collector
 			}
 
 			// Build selector to only work on relevant host files for the class
-			$sSelector = 'true';
-			if (array_key_exists('ansible_selector', $aClassConfig)) {
-				$aSelector = $aClassConfig['ansible_selector'];
+			$sCollectCondition = 'true';
+			if (array_key_exists('collect_condition', $aClassConfig)) {
+				$aSelector = $aClassConfig['collect_condition'];
 				if (is_array($aSelector)) {
 					$bFirstLoop = true;
 					foreach ($aSelector as $key => $value) {
 						if ($bFirstLoop) {
-							$sSelector = 'jsondata.'.$key.' == "'.$value.'"';
+							$sCollectCondition = 'jsondata.'.$key.' == "'.$value.'"';
 							$bFirstLoop = false;
 						} else {
-							$sSelector .= ' and jsondata.'.$key.' == '.$value;
+							$sCollectCondition .= ' and jsondata.'.$key.' == '.$value;
 						}
 					}
 				}
 			}
 
-
 			if ($bConfigIsCorrect) {
 				$aExtraVars = [
 					'raw_directory' => $this->oCollectionPlan->GetDirectory('raw'),
 					'csv_directory' => $this->oCollectionPlan->GetDirectory('csv'),
-					'itop_class' => $this->sCIClass,
+					'ci_class' => $this->sCIClass,
 					'is_link' => $sIsLink,
-					'itop_attributes' => $aItopAttributes,
+					'itop_attributes' => $aHostAttributes,
 					'primary_key' => $aPrimaryKey,
 					'host_attributes' => $aHostAttributes,
-					'default_attributes' => $aDefaultAttributes,
-					'collect_condition' => $sSelector,
+					'collect_condition' => $sCollectCondition,
 				];
+				if (!empty($aDefaultAttributes)) {
+					$aExtraVars = [
+						'default_attributes' => $aDefaultAttributes,
+						];
+				}
 			}
 		} else {
-			Utils::Log(LOG_ERR, "No parameters have been found.");
+			Utils::Log(LOG_ERR, '['.get_class($this).'] No parameters have been found.');
 		}
 
 		return $aExtraVars;
@@ -123,11 +126,11 @@ class AnsibleCollector extends Collector
 	{
 		$sExtraVars = json_encode($aExtraVars);
 		$sAnsibleCmd = 'ansible-playbook '.APPROOT.'collectors/src/playbooks/'.$sPlaybook.' --extra-vars \''.$sExtraVars.'\'';
-		Utils::Log(LOG_DEBUG, 'The following Ansible command will be executed to extract the '.$this->sCIClass.' parameters');
+		Utils::Log(LOG_DEBUG, '['.get_class($this).'] The following Ansible command will be executed to extract the '.$this->sCIClass.' parameters:');
 		Utils::Log(LOG_DEBUG, "     ".$sAnsibleCmd);
 		exec($sAnsibleCmd, $aOutput, $iResultCode);
 		if ($iResultCode) {
-			Utils::Log(LOG_ERR, 'Extracting '.$this->sCIClass.' data from facts failed. CSV output will not be created.');
+			Utils::Log(LOG_ERR, '['.get_class($this).'] Extracting '.$this->sCIClass.' data from facts failed. CSV output will not be created.');
 			foreach ($aOutput as $sOutputLine) {
 				Utils::Log(LOG_DEBUG, $sOutputLine."\n");
 			}
@@ -143,22 +146,22 @@ class AnsibleCollector extends Collector
 	 */
 	public function Prepare()
 	{
-		$bRet = parent::Prepare();
-
 		$aExtraVars = $this->GetExtraVars();
 		if (empty($aExtraVars)) {
-			Utils::Log(LOG_ERR, 'It has not been possible to get required parameters for '.get_class($this).' Collection stops here.');
+			Utils::Log(LOG_ERR, '['.get_class($this).'] It has not been possible to get required parameters for '.get_class($this).' Collection stops here.');
 
 			return false;
 		}
 
 		if ($this->ExecPlaybook($this->sPlayBook, $aExtraVars)) {
-			Utils::Log(LOG_INFO, 'CSV file ansible.'.$this->sCIClass.'.csv has been created.');
-			return $bRet;
+			Utils::Log(LOG_INFO, '['.get_class($this).'] CSV file Ansible'.$this->sCIClass.'Collector.csv has been created.');
+		} else {
+			Utils::Log(LOG_INFO, '['.get_class($this).'] Extracting '.$this->sCIClass.' data from facts failed. CSV output will not be created.');
+
+			return false;
 		}
 
-		Utils::Log(LOG_INFO, 'Extracting '.$this->sCIClass.' data from facts failed. CSV output will not be created.');
-		return false;
+		return parent::Prepare();
 	}
 
 	/**
