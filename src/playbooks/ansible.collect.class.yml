@@ -5,34 +5,34 @@
 # This playbook...
 #
 # Input parameters:
-#  - itop_class: iTop class of object that is presently collected.
+#  - ci_class: iTop CI class of object that is presently collected.
+#  - host_attributes: Array of Ansible attributes to lookup in the raw file and to add to the csv output.
 #  - itop_attributes: Array containing the iTop attributes that should be collected for that class.
 #  - primary_key: Array containing Ansible attributes used to build the primary key
-#  - host_attributes: Array of Ansible attributes to lookup in the raw file and to add to the csv output.
 #
 # Output parameters:
-#  - csv_file: CSV file containing all object belonging to the itop_class to be synchronized
+#  - csv_file: CSV file containing all object belonging to the ci_class to be synchronized
 #
 ---
 - name: Build CSV file containing all objects of a given class to be synchronized within iTop
-  hosts: all, localhost
+  hosts: localhost
 
   gather_facts: false
 
   vars:
     # Name of the output file
-    csv_file: "{{ csv_directory }}/ansible.{{ itop_class }}.csv"
+    csv_file: "{{ csv_directory }}/Ansible{{ ci_class }}Collector.csv"
 
   tasks:
     - name: Create csv file
       ansible.builtin.copy:
-        content: "primary_key,{{ itop_attributes | join(',') }}"
+        content: "primary_key;{{ itop_attributes | join(';') }}"
         dest: "{{ csv_file }}"
 
     - name: Add one line per host
       include_tasks: ./ansible.collect.line.yml
       vars:
-        hostname: "{{ item }}"
-      loop: "{{ play_hosts }}"
+        hostfile: "{{ item }}"
+      with_fileglob: "{{ raw_directory }}/*"
       when: is_link == "false"
 

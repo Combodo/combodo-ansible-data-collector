@@ -16,8 +16,14 @@
 ---
 - name: Import file content into variable
   ansible.builtin.include_vars:
-    file: "{{ raw_directory }}/{{ hostname }}"
+    file: "{{ hostfile }}"
     name: jsondata
+
+- name: Create empty variables
+  ansible.builtin.set_fact:
+    primary_key_values: []
+    attribute_values: []
+    default_values: []
 
 - name: Get line
   block:
@@ -27,8 +33,6 @@
       loop: "{{ primary_key }}"
       loop_control:
         loop_var: primary_query
-      vars:
-        primary_key_values: []
 
     - name: Get host attributes
       ansible.builtin.set_fact:
@@ -36,8 +40,6 @@
       loop: "{{ host_attributes }}"
       loop_control:
         loop_var: host_query
-      vars:
-        attribute_values: []
 
     - name: Get default attributes
       ansible.builtin.set_fact:
@@ -45,22 +47,21 @@
       loop: "{{ default_attributes }}"
       loop_control:
         loop_var: default_query
-      vars:
-        default_values: []
+      when: default_attributes is defined
 
     - name: Apppend result to output file with default values
       ansible.builtin.lineinfile:
         path: "{{ csv_file }}"
-        line: "{{ primary_key_values | join('_') }},{{ attribute_values | join(',') }},{{ default_values | join(',') }}"
-      when: default_values is defined
+        line: "{{ primary_key_values | join('_') }};{{ attribute_values | join(';') }};{{ default_values | join(';') }}"
+      when: default_attributes is defined
 
     - name: Apppend result to output file with no default values
       ansible.builtin.lineinfile:
         path: "{{ csv_file }}"
-        line: "{{ primary_key_values | join('_') }},{{ attribute_values | join(',') }}"
-      when: default_values is undefined
+        line: "{{ primary_key_values | join('_') }};{{ attribute_values | join(';') }}"
+      when: default_attributes is undefined
 
-  when: (collect_condition | bool == true) or (collect_condition)
+  when: (collect_condition)
   rescue:
     - name: Print when collection is not met
       ansible.builtin.debug:
