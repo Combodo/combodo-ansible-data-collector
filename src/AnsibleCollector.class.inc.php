@@ -74,17 +74,17 @@ class AnsibleCollector extends CSVCollector
 			}
 
 			// Build selector to only work on relevant host files for the class
-			$sCollectCondition = 'true';
+			$aCollectCondition = [];
 			if (array_key_exists('collect_condition', $aClassConfig)) {
 				$aSelector = $aClassConfig['collect_condition'];
 				if (is_array($aSelector)) {
 					$bFirstLoop = true;
 					foreach ($aSelector as $key => $value) {
 						if ($bFirstLoop) {
-							$sCollectCondition = 'jsondata.'.$key.' == "'.$value.'"';
+							// Include one test only for the time being
+							$aCollectCondition[] = $key;
+							$aCollectCondition[] = $value;
 							$bFirstLoop = false;
-						} else {
-							$sCollectCondition .= ' and jsondata.'.$key.' == '.$value;
 						}
 					}
 				}
@@ -99,8 +99,10 @@ class AnsibleCollector extends CSVCollector
 					'itop_attributes' => $aHostAttributes,
 					'primary_key' => $aPrimaryKey,
 					'host_attributes' => $aHostAttributes,
-					'collect_condition' => $sCollectCondition,
 				];
+				if (!empty($aCollectCondition)) {
+					$aExtraVars['collect_condition'] = $aCollectCondition;
+				}
 				if (!empty($aDefaultAttributes)) {
 					$aExtraVars = [
 						'default_attributes' => $aDefaultAttributes,
