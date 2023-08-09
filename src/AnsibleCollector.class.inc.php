@@ -37,7 +37,7 @@ class AnsibleCollector extends CSVCollector
 		$aClassConfig = Utils::GetConfigurationValue(strtolower(get_class($this)));
 		if (is_array($aClassConfig)) {
 			// Check if class is a link
-			if (array_key_exists('is_link', $aClassConfig)) {
+			if (array_key_exists('is_link', $aClassConfig) && ($aClassConfig['is_link'] == 'true')) {
 				$sIsLink = 'true';
 			} else {
 				$sIsLink = 'false';
