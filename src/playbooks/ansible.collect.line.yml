@@ -21,14 +21,20 @@
     file: "{{ hostfile }}"
     name: jsondata
 
-- name: Create empty variables
+- name: Test collect condition
   ansible.builtin.set_fact:
-    primary_key_values: []
-    attribute_values: []
-    default_values: []
+    attribute_to_check: "{{ jsondata | community.general.json_query(collect_condition[0]) }}"
+    value_to_check: "{{ collect_condition[1] }}"
+  when: collect_condition is defined
 
-- name: Get line
+- name: Collect line
   block:
+    - name: Create empty variables
+      ansible.builtin.set_fact:
+        primary_key_values: []
+        attribute_values: []
+        default_values: []
+
     - name: Get primary key
       ansible.builtin.set_fact:
         primary_key_values: "{{ primary_key_values + [jsondata | community.general.json_query(primary_query)] }}"
@@ -62,9 +68,4 @@
         path: "{{ csv_file }}"
         line: "{{ primary_key_values | join('_') }};{{ attribute_values | join(';') }}"
       when: default_attributes is undefined
-
-  when: (collect_condition)
-  rescue:
-    - name: Print when collection is not met
-      ansible.builtin.debug:
-        msg: "Collect condition is not met for {{ host_attributes }}"
+  when: ((collect_condition is defined) and (attribute_to_check == value_to_check)) or (collect_condition is not defined)
