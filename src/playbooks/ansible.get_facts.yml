@@ -14,7 +14,7 @@
 #
 ---
 - name: Store gathered facts in files for later processing
-  hosts: all, localhost
+  hosts: all
 
   tasks:
     - name: Make sure that raw directory exists
@@ -26,7 +26,7 @@
 
     - name: Dump facts on a per host basis in the raw directory
       ansible.builtin.copy:
-        content: '{{ ansible_facts }}'
+        content: "{{ ansible_facts }}"
         dest: "{{ raw_directory }}/{{ inventory_hostname }}"
       delegate_to: localhost
 
