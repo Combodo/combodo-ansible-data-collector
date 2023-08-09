@@ -52,7 +52,7 @@ class AnsibleCollector extends CSVCollector
 				}
 			}
 
-			// Get the list of iTop, host and default attributes
+			// Get the list of iTop attributes, Ansible attributes and default ones
 			if (array_key_exists('fields', $aClassConfig)) {
 				$aFields = $aClassConfig['fields'];
 				if (!is_array($aFields)) {
