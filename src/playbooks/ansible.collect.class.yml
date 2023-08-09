@@ -6,9 +6,10 @@
 #
 # Input parameters:
 #  - ci_class: iTop CI class of object that is presently collected.
-#  - host_attributes: Array of Ansible attributes to lookup in the raw file and to add to the csv output.
+#  - csv_directory: directory where the CSV output file should be built
 #  - itop_attributes: Array containing the iTop attributes that should be collected for that class.
 #  - primary_key: Array containing Ansible attributes used to build the primary key
+#  - raw_directory: directory where are located all the facts related to the different CIs
 #
 # Output parameters:
 #  - csv_file: CSV file containing all object belonging to the ci_class to be synchronized
