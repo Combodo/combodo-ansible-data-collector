@@ -104,9 +104,7 @@ class AnsibleCollector extends CSVCollector
 					$aExtraVars['collect_condition'] = $aCollectCondition;
 				}
 				if (!empty($aDefaultAttributes)) {
-					$aExtraVars = [
-						'default_attributes' => $aDefaultAttributes,
-						];
+					$aExtraVars['default_attributes'] = $aDefaultAttributes;
 				}
 			}
 		} else {
