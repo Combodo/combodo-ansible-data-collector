@@ -5,10 +5,12 @@
 # This task adds a line to the csv file being build for the current collection.
 #
 # Input parameters:
-#  - hostname: Host to consider. The file containing its facts has the same name.
-#  - primary_key_values: List of Ansible attributes to use to build the primary key
-#  - ansible_host_attributes: List of Ansible attributes to consider from host inventory
+#  - collect_condition: condition that should be met to process the hostfile
 #  - csv_file: File where the relevant host attributes will be appended in a new line
+#  - default_attributes: Array of default attributes to add to the output line
+#  - host_attributes: Array of Ansible attributes to lookup in the raw file and to add to the csv output.
+#  - hostfile: The file containing the host's facts
+#  - primary_key: Array containing Ansible attributes used to build the primary key
 #
 # Output parameters:
 #  - Line appended to the csv_file with host attributes extracted from Ansible
