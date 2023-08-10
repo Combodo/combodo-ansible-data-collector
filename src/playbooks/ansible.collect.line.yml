@@ -2,7 +2,7 @@
 # @copyright   Copyright (C) 2023 Combodo SARL
 # @license     http://opensource.org/licenses/AGPL-3.0
 #
-# This task adds a line to the csv file being build for the current collection.
+# This task extracts parameters from a host file, transforms them into a csv line and appends this line to a csv file.
 #
 # Input parameters:
 #  - collect_condition: condition that should be met to process the hostfile
