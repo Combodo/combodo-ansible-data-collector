@@ -7,7 +7,6 @@
 # Input parameters:
 #  - collect_condition: condition that should be met to process the hostfile
 #  - csv_file: File where the relevant host attributes will be appended in a new line
-#  - default_attributes: Array of default attributes to add to the output line
 #  - host_attributes: Array of Ansible attributes to lookup in the raw file and to add to the csv output.
 #  - hostfile: The file containing the host's facts
 #  - primary_key: Array containing Ansible attributes used to build the primary key
@@ -27,45 +26,8 @@
     value_to_check: "{{ collect_condition[1] }}"
   when: collect_condition is defined
 
-- name: Collect line
-  block:
-    - name: Create empty variables
-      ansible.builtin.set_fact:
-        primary_key_values: []
-        attribute_values: []
-        default_values: []
-
-    - name: Get primary key
-      ansible.builtin.set_fact:
-        primary_key_values: "{{ primary_key_values + [jsondata | community.general.json_query(primary_query)] }}"
-      loop: "{{ primary_key }}"
-      loop_control:
-        loop_var: primary_query
-
-    - name: Get host attributes
-      ansible.builtin.set_fact:
-        attribute_values: "{{ attribute_values + [jsondata | community.general.json_query(host_query)] }}"
-      loop: "{{ host_attributes }}"
-      loop_control:
-        loop_var: host_query
-
-    - name: Get default attributes
-      ansible.builtin.set_fact:
-        default_values: "{{ default_values + [default_query] }}"
-      loop: "{{ default_attributes }}"
-      loop_control:
-        loop_var: default_query
-      when: default_attributes is defined
-
-    - name: Apppend result to output file with default values
-      ansible.builtin.lineinfile:
-        path: "{{ csv_file }}"
-        line: "{{ primary_key_values | join('_') }};{{ attribute_values | join(';') }};{{ default_values | join(';') }}"
-      when: default_attributes is defined
-
-    - name: Apppend result to output file with no default values
-      ansible.builtin.lineinfile:
-        path: "{{ csv_file }}"
-        line: "{{ primary_key_values | join('_') }};{{ attribute_values | join(';') }}"
-      when: default_attributes is undefined
-  when: ((collect_condition is defined) and (attribute_to_check == value_to_check)) or (collect_condition is not defined)
+- name: Add line to csv file
+  include_tasks: ./ansible.add.line.yml
+  vars:
+    list_name: ""
+  when: (collect_condition is not defined) or ((collect_condition is defined) and (attribute_to_check == value_to_check))
