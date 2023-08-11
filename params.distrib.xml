@@ -21,8 +21,11 @@
   </ansiblebrandcollector>
 
   <!-- LogicalInterface -->
-  <ansiblelogicalinerfacecollector>
-    <is_link>true</is_link>
+  <ansiblelogicalinterfacecollector>
+    <csv_file>data/facts/csv/AnsibleLogicalInterfaceCollector.csv</csv_file>
+    <has_header>yes</has_header>
+    <from_array>true</from_array>
+    <array_name>interfaces</array_name>
     <collect_condition>
       <virtualization_role>guest</virtualization_role>
     </collect_condition>
@@ -36,7 +39,7 @@
       <speed>speed</speed>
       <virtualmachine_id>hostname</virtualmachine_id>
     </fields>
-  </ansiblelogicalinerfacecollector>
+  </ansiblelogicalinterfacecollector>
 
   <!-- Model -->
   <ansiblemodelcollector>
@@ -142,38 +145,44 @@
     <!-- Brand -->
     <collector>
       <name>AnsibleBrandCollector</name>
-      <enable>yes</enable>
+      <enable>no</enable>
       <rank>1</rank>
     </collector>
     <!-- Model -->
     <collector>
       <name>AnsibleModelCollector</name>
-      <enable>yes</enable>
+      <enable>no</enable>
       <rank>2</rank>
     </collector>
     <!-- OS Family -->
     <collector>
       <name>AnsibleOSFamilyCollector</name>
-      <enable>yes</enable>
+      <enable>no</enable>
       <rank>3</rank>
     </collector>
     <!-- OS Version -->
     <collector>
       <name>AnsibleOSVersionCollector</name>
-      <enable>yes</enable>
+      <enable>no</enable>
       <rank>4</rank>
     </collector>
     <!-- Server -->
     <collector>
       <name>AnsibleServerCollector</name>
-      <enable>yes</enable>
+      <enable>no</enable>
       <rank>5</rank>
     </collector>
     <!-- VirtualMachine -->
     <collector>
       <name>AnsibleVirtualMachineCollector</name>
-      <enable>yes</enable>
+      <enable>no</enable>
       <rank>6</rank>
+    </collector>
+    <!-- LogicalInterface -->
+    <collector>
+      <name>AnsibleLogicalInterfaceCollector</name>
+      <enable>yes</enable>
+      <rank>7</rank>
     </collector>
   </collectors_launch_sequence>
 
@@ -216,5 +225,14 @@
   <os_version_mapping type="array">
     <pattern>/.*/%1$s</pattern>
   </os_version_mapping>
+  <integer_none_mapping type="array">
+    <pattern>/None/0</pattern>
+    <pattern>/-.*/0</pattern>
+    <pattern>/.*/%1$s</pattern>
+  </integer_none_mapping>
+  <string_none_mapping type="array">
+    <pattern>/None/</pattern>
+    <pattern>/.*/%1$s</pattern>
+  </string_none_mapping>
 
 </parameters>
