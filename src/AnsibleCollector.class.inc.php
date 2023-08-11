@@ -37,10 +37,16 @@ class AnsibleCollector extends CSVCollector
 		$aClassConfig = Utils::GetConfigurationValue(strtolower(get_class($this)));
 		if (is_array($aClassConfig)) {
 			// Check if class is a link
-			if (array_key_exists('is_link', $aClassConfig) && ($aClassConfig['is_link'] == 'true')) {
-				$sIsLink = 'true';
+			if (array_key_exists('from_array', $aClassConfig) && ($aClassConfig['from_array'] == 'true')) {
+				if (array_key_exists('array_name', $aClassConfig)) {
+					$sFromArray = 'true';
+					$sArrayName = $aClassConfig['array_name'];
+				} else {
+					Utils::Log(LOG_ERR, '['.get_class($this).'] array_name configuration is not correct. Please see documentation.');
+					$bConfigIsCorrect = false;
+				}
 			} else {
-				$sIsLink = 'false';
+				$sFromArray = 'false';
 			}
 
 			// Get list of attributes to build the primary key
@@ -52,21 +58,16 @@ class AnsibleCollector extends CSVCollector
 				}
 			}
 
-			// Get the list of iTop attributes, Ansible attributes and default ones
+			// Get the list of Ansible attributes and default ones
 			if (array_key_exists('fields', $aClassConfig)) {
 				$aFields = $aClassConfig['fields'];
 				if (!is_array($aFields)) {
 					Utils::Log(LOG_ERR, '['.get_class($this).'] Fields section configuration is not correct. Please see documentation.');
 					$bConfigIsCorrect = false;
 				} else {
-					$aItopAttributes = [];
 					$aHostAttributes = [];
-					$aDefaultAttributes = [];
 					foreach ($aFields as $key => $value) {
-						$aItopAttributes[] = $key;
-						if ($value == '') {
-							$aDefaultAttributes[] = Utils::GetConfigurationValue('default_'.$key, '');
-						} else {
+						if ($value != '') {
 							$aHostAttributes[] = $value;
 						}
 					}
@@ -78,14 +79,11 @@ class AnsibleCollector extends CSVCollector
 			if (array_key_exists('collect_condition', $aClassConfig)) {
 				$aSelector = $aClassConfig['collect_condition'];
 				if (is_array($aSelector)) {
-					$bFirstLoop = true;
 					foreach ($aSelector as $key => $value) {
-						if ($bFirstLoop) {
-							// Include one test only for the time being
-							$aCollectCondition[] = $key;
-							$aCollectCondition[] = $value;
-							$bFirstLoop = false;
-						}
+						// Include one test only for the time being
+						$aCollectCondition[] = $key;
+						$aCollectCondition[] = $value;
+						break;
 					}
 				}
 			}
@@ -95,16 +93,15 @@ class AnsibleCollector extends CSVCollector
 					'raw_directory' => $this->oCollectionPlan->GetDirectory('raw'),
 					'csv_directory' => $this->oCollectionPlan->GetDirectory('csv'),
 					'ci_class' => $this->sCIClass,
-					'is_link' => $sIsLink,
-					'itop_attributes' => $aHostAttributes,
+					'from_array' => $sFromArray,
 					'primary_key' => $aPrimaryKey,
 					'host_attributes' => $aHostAttributes,
 				];
 				if (!empty($aCollectCondition)) {
 					$aExtraVars['collect_condition'] = $aCollectCondition;
 				}
-				if (!empty($aDefaultAttributes)) {
-					$aExtraVars['default_attributes'] = $aDefaultAttributes;
+				if ($sFromArray == 'true') {
+					$aExtraVars['array_name'] = $sArrayName;
 				}
 			}
 		} else {
