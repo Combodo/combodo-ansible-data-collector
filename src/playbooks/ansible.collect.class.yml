@@ -2,12 +2,15 @@
 # @copyright   Copyright (C) 2023 Combodo SARL
 # @license     http://opensource.org/licenses/AGPL-3.0
 #
-# This playbook...
+# This playbook is in charge to build, for a given class, the csv file that will be used as an entry for the
+#  csv collector to be launched next.
 #
 # Input parameters:
 #  - ci_class: iTop CI class of object that is presently collected.
 #  - csv_directory: directory where the CSV output file should be built
-#  - itop_attributes: Array containing the iTop attributes that should be collected for that class.
+#  - from_array: true if ci_class attributes appear in arrays within the host file,
+#                false if ci_class attributes are at the first level of the host file
+#  - host_attributes: Array of Ansible attributes to lookup in the raw file and to add to the csv output.
 #  - primary_key: Array containing Ansible attributes used to build the primary key
 #  - raw_directory: directory where are located all the facts related to the different CIs
 #
@@ -27,7 +30,7 @@
   tasks:
     - name: Create csv file
       ansible.builtin.copy:
-        content: "primary_key;{{ itop_attributes | join(';') }}"
+        content: "primary_key;{{ host_attributes | join(';') }}"
         dest: "{{ csv_file }}"
 
     - name: Add one line per host
@@ -35,5 +38,11 @@
       vars:
         hostfile: "{{ item }}"
       with_fileglob: "{{ raw_directory }}/*"
-      when: is_link == "false"
+      when: from_array == "false"
 
+    - name: Add multiple lines per host
+      include_tasks: ./ansible.collect.multiplelines.yml
+      vars:
+        hostfile: "{{ item }}"
+      with_fileglob: "{{ raw_directory }}/*"
+      when: from_array != "false"
