@@ -1,0 +1,41 @@
+ #
+# @copyright   Copyright (C) 2023 Combodo SARL
+# @license     http://opensource.org/licenses/AGPL-3.0
+#
+# This task extracts parameters from a host file, transforms them into multiple csv lines and append them to a csv file.
+#
+# Input parameters:
+#  - collect_condition: condition that should be met to process the hostfile
+#  - csv_file: File where the relevant host attributes will be appended in a new line
+#  - host_attributes: Array of Ansible attributes to lookup in the raw file and to add to the csv output.
+#  - hostfile: The file containing the host's facts
+#  - primary_key: Array containing Ansible attributes used to build the primary key
+#
+# Output parameters:
+#  - Line appended to the csv_file with host attributes extracted from Ansible
+#
+---
+- name: Import file content into variable
+  ansible.builtin.include_vars:
+    file: "{{ hostfile }}"
+    name: jsondata
+
+- name: Test collect condition
+  ansible.builtin.set_fact:
+    attribute_to_check: "{{ jsondata | community.general.json_query(collect_condition[0]) }}"
+    value_to_check: "{{ collect_condition[1] }}"
+  when: collect_condition is defined
+
+- name: Get the list of objects that will need to be collected
+  ansible.builtin.set_fact:
+    array_content: "{{ jsondata | community.general.json_query(array_name) }}"
+  when: ((collect_condition is defined) and (attribute_to_check == value_to_check)) or (collect_condition is not defined)
+
+- name: Add lines to csv file
+  include_tasks: ./ansible.add.line.yml
+  vars:
+    list_name: "{{ array_item + '.' }}"
+  loop: "{{ array_content }}"
+  loop_control:
+    loop_var: array_item
+  when: (array_content is defined) and ((collect_condition is defined) and (attribute_to_check == value_to_check)) or (collect_condition is not defined)
