@@ -24,8 +24,16 @@
   <ansiblelogicalinterfacecollector>
     <csv_file>data/facts/csv/AnsibleLogicalInterfaceCollector.csv</csv_file>
     <has_header>yes</has_header>
-    <from_array>true</from_array>
-    <array_name>interfaces</array_name>
+    <array_to_consider_in_facts>
+      <from_array>true</from_array>
+      <array_name>interfaces</array_name>
+      <out_of_array_keys>
+        <virtualmachine_id>hostname</virtualmachine_id>
+      </out_of_array_keys>
+      <out_of_array_fields>
+        <virtualmachine_id>hostname</virtualmachine_id>
+      </out_of_array_fields>
+    </array_to_consider_in_facts>
     <collect_condition>
       <virtualization_role>guest</virtualization_role>
     </collect_condition>
@@ -86,6 +94,35 @@
       <osfamily_id>distribution</osfamily_id>
     </fields>
   </ansibleosversioncollector>
+
+  <!-- PhysicalInterface -->
+  <ansiblephysicalinterfacecollector>
+    <csv_file>data/facts/csv/AnsiblePhysicalInterfaceCollector.csv</csv_file>
+    <has_header>yes</has_header>
+    <array_to_consider_in_facts>
+      <from_array>true</from_array>
+      <array_name>interfaces</array_name>
+      <out_of_array_keys>
+        <connectableci_id>hostname</connectableci_id>
+      </out_of_array_keys>
+      <out_of_array_fields>
+        <connectableci_id>hostname</connectableci_id>
+      </out_of_array_fields>
+    </array_to_consider_in_facts>
+    <collect_condition>
+      <virtualization_role>host</virtualization_role>
+    </collect_condition>
+    <primary_key type="array">
+      <ansible_attribute>device</ansible_attribute>
+      <ansible_attribute>hostname</ansible_attribute>
+    </primary_key>
+    <fields>
+      <macaddress>macaddress</macaddress>
+      <name>device</name>
+      <speed>speed</speed>
+      <connectableci_id>hostname</connectableci_id>
+    </fields>
+  </ansiblephysicalinterfacecollector>
 
   <!-- Server -->
   <ansibleservercollector>
@@ -174,15 +211,20 @@
     </collector>
     <!-- VirtualMachine -->
     <collector>
+      <name>AnsiblePhysicalInterfaceCollector</name>
+      <enable>yes</enable>
+      <rank>6</rank>
+    </collector>
+   <collector>
       <name>AnsibleVirtualMachineCollector</name>
       <enable>no</enable>
-      <rank>6</rank>
+      <rank>7</rank>
     </collector>
     <!-- LogicalInterface -->
     <collector>
       <name>AnsibleLogicalInterfaceCollector</name>
       <enable>yes</enable>
-      <rank>7</rank>
+      <rank>8</rank>
     </collector>
   </collectors_launch_sequence>
 

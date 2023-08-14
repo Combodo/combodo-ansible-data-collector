@@ -10,8 +10,14 @@
 #  - csv_directory: directory where the CSV output file should be built
 #  - from_array: true if ci_class attributes appear in arrays within the host file,
 #                false if ci_class attributes are at the first level of the host file
-#  - host_attributes: Array of Ansible attributes to lookup in the raw file and to add to the csv output.
-#  - primary_key: Array containing Ansible attributes used to build the primary key
+#  - host_attributes: Array of Ansible attributes to lookup in the raw file, possibly in an array, and to add to the
+#     csv output.
+#  - out_of_array_attributes: Array of Ansible attributes to lookup in the raw file, at the first level of the json
+#     structure, and to add to the csv output
+#  - primary_key: Array containing Ansible attributes used to build the primary key, possibly in an array, and to add
+#      to the csv output.
+#  - out_of_array_primary_key: Array of Ansible attributes used to build the primary key that sit at the first level of
+#     the json structure, and to add to the csv output
 #  - raw_directory: directory where are located all the facts related to the different CIs
 #
 # Output parameters:
@@ -28,10 +34,17 @@
     csv_file: "{{ csv_directory }}/Ansible{{ ci_class }}Collector.csv"
 
   tasks:
-    - name: Create csv file
+    - name: Create csv file with no out_of_array attributes
       ansible.builtin.copy:
         content: "primary_key;{{ host_attributes | join(';') }}"
         dest: "{{ csv_file }}"
+      when: out_of_array_attributes is undefined
+
+    - name: Create csv file with out_of_array attributes
+      ansible.builtin.copy:
+        content: "primary_key;{{ host_attributes | join(';') }};{{ out_of_array_attributes | join(';') }}"
+        dest: "{{ csv_file }}"
+      when: out_of_array_attributes is defined
 
     - name: Add one line per host
       include_tasks: ./ansible.collect.line.yml

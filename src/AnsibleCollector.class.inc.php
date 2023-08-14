@@ -31,43 +31,80 @@ class AnsibleCollector extends CSVCollector
 	 */
 	protected function GetExtraVars(): array
 	{
-		$aExtraVars = [];
-
-		$bConfigIsCorrect = true;
 		$aClassConfig = Utils::GetConfigurationValue(strtolower(get_class($this)));
 		if (is_array($aClassConfig)) {
-			// Check if class is a link
-			if (array_key_exists('from_array', $aClassConfig) && ($aClassConfig['from_array'] == 'true')) {
-				if (array_key_exists('array_name', $aClassConfig)) {
-					$sFromArray = 'true';
-					$sArrayName = $aClassConfig['array_name'];
-				} else {
-					Utils::Log(LOG_ERR, '['.get_class($this).'] array_name configuration is not correct. Please see documentation.');
-					$bConfigIsCorrect = false;
+			// Read parameters related to the array to consider in Ansible facts
+			$aOutOfArrayKeys = [];
+			$aOutOfArrayFields = [];
+			$sFromArray = 'false';
+			if (array_key_exists('array_to_consider_in_facts', $aClassConfig)) {
+				$aArrayToConsider = $aClassConfig['array_to_consider_in_facts'];
+				if (array_key_exists('from_array', $aArrayToConsider) && ($aArrayToConsider['from_array'] == 'true')) {
+					if (array_key_exists('array_name', $aArrayToConsider)) {
+						$sFromArray = 'true';
+						$sArrayName = $aArrayToConsider['array_name'];
+
+						// Get the list of Ansible attributes that make the primary key that are not in the array
+						if (array_key_exists('out_of_array_keys', $aArrayToConsider)) {
+							$aOutOfArrayKeys = $aArrayToConsider['out_of_array_keys'];
+							if (!is_array($aOutOfArrayKeys)) {
+								Utils::Log(LOG_ERR, '['.get_class($this).'] Out_of_array_keys section configuration is not correct. Please see documentation.');
+								return [];
+							}
+						}
+
+						// Get the list of Ansible attributes that are not in the array
+						if (array_key_exists('out_of_array_fields', $aArrayToConsider)) {
+							$aOutOfArrayFields = $aArrayToConsider['out_of_array_fields'];
+							if (!is_array($aOutOfArrayFields)) {
+								Utils::Log(LOG_ERR, '['.get_class($this).'] Out_of_array_fields section configuration is not correct. Please see documentation.');
+								return [];
+							}
+						}
+					} else {
+						Utils::Log(LOG_ERR, '['.get_class($this).'] array_name parameter is not correct. Please see documentation.');
+
+						return [];
+					}
 				}
-			} else {
-				$sFromArray = 'false';
 			}
 
 			// Get list of attributes to build the primary key
 			if (array_key_exists('primary_key', $aClassConfig)) {
-				$aPrimaryKey = $aClassConfig['primary_key'];
-				if (!is_array($aPrimaryKey)) {
+				$aPrimaryKeyTemp = $aClassConfig['primary_key'];
+				if (!is_array($aPrimaryKeyTemp)) {
 					Utils::Log(LOG_ERR, '['.get_class($this).'] Primary_key section configuration is not correct. Please see documentation.');
-					$bConfigIsCorrect = false;
+					return [];
+				}
+
+				$aPrimaryKey = [];
+				$aOutOfArrayPrimaryKey = [];
+				foreach ($aPrimaryKeyTemp as $key => $value) {
+					if ($value != '') {
+						if (in_array($value, $aOutOfArrayKeys)) {
+							$aOutOfArrayPrimaryKey[] = $value;
+						} else {
+							$aPrimaryKey[] = $value;
+						}
+					}
 				}
 			}
 
-			// Get the list of Ansible attributes and default ones
+			// Get the list of Ansible attributes defined in array and outside
 			if (array_key_exists('fields', $aClassConfig)) {
 				$aFields = $aClassConfig['fields'];
 				if (!is_array($aFields)) {
 					Utils::Log(LOG_ERR, '['.get_class($this).'] Fields section configuration is not correct. Please see documentation.');
-					$bConfigIsCorrect = false;
-				} else {
-					$aHostAttributes = [];
-					foreach ($aFields as $key => $value) {
-						if ($value != '') {
+					return [];
+				}
+
+				$aHostAttributes = [];
+				$aOutOfArrayAttributes = [];
+				foreach ($aFields as $key => $value) {
+					if ($value != '') {
+						if (array_key_exists($key, $aOutOfArrayFields)) {
+							$aOutOfArrayAttributes[] = $value;
+						} else {
 							$aHostAttributes[] = $value;
 						}
 					}
@@ -88,27 +125,31 @@ class AnsibleCollector extends CSVCollector
 				}
 			}
 
-			if ($bConfigIsCorrect) {
-				$aExtraVars = [
-					'raw_directory' => $this->oCollectionPlan->GetDirectory('raw'),
-					'csv_directory' => $this->oCollectionPlan->GetDirectory('csv'),
-					'ci_class' => $this->sCIClass,
-					'from_array' => $sFromArray,
-					'primary_key' => $aPrimaryKey,
-					'host_attributes' => $aHostAttributes,
-				];
-				if (!empty($aCollectCondition)) {
-					$aExtraVars['collect_condition'] = $aCollectCondition;
+			$aExtraVars = [
+				'raw_directory' => $this->oCollectionPlan->GetDirectory('raw'),
+				'csv_directory' => $this->oCollectionPlan->GetDirectory('csv'),
+				'ci_class' => $this->sCIClass,
+				'from_array' => $sFromArray,
+				'primary_key' => $aPrimaryKey,
+				'host_attributes' => $aHostAttributes,
+			];
+			if (!empty($aCollectCondition)) {
+				$aExtraVars['collect_condition'] = $aCollectCondition;
+			}
+			if ($sFromArray == 'true') {
+				$aExtraVars['array_name'] = $sArrayName;
+				if (!empty($aOutOfArrayPrimaryKey)) {
+					$aExtraVars['out_of_array_primary_key'] = $aOutOfArrayPrimaryKey;
 				}
-				if ($sFromArray == 'true') {
-					$aExtraVars['array_name'] = $sArrayName;
+				if (!empty($aOutOfArrayAttributes)) {
+					$aExtraVars['out_of_array_attributes'] = $aOutOfArrayAttributes;
 				}
 			}
+			return $aExtraVars;
 		} else {
 			Utils::Log(LOG_ERR, '['.get_class($this).'] No parameters have been found.');
+			return [];
 		}
-
-		return $aExtraVars;
 	}
 
 	/**

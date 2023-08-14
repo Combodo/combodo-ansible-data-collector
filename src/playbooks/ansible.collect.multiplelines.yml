@@ -7,9 +7,15 @@
 # Input parameters:
 #  - collect_condition: condition that should be met to process the hostfile
 #  - csv_file: File where the relevant host attributes will be appended in a new line
-#  - host_attributes: Array of Ansible attributes to lookup in the raw file and to add to the csv output.
+#  - host_attributes: Array of Ansible attributes to lookup in the raw file, possibly in an array, and to add to the
+#     csv output.
+#  - out_of_array_attributes: Array of Ansible attributes to lookup in the raw file, at the first level of the json
+#     structure, and to add to the csv output
 #  - hostfile: The file containing the host's facts
-#  - primary_key: Array containing Ansible attributes used to build the primary key
+#  - primary_key: Array containing Ansible attributes used to build the primary key, possibly in an array, and to add
+#      to the csv output.
+#  - out_of_array_primary_key: Array of Ansible attributes used to build the primary key that sit at the first level of
+#     the json structure, and to add to the csv output
 #
 # Output parameters:
 #  - Line appended to the csv_file with host attributes extracted from Ansible

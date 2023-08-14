@@ -7,9 +7,15 @@
 # Input parameters:
 #  - collect_condition: condition that should be met to process the hostfile
 #  - csv_file: File where the relevant host attributes will be appended in a new line
-#  - host_attributes: Array of Ansible attributes to lookup in the raw file and to add to the csv output.
+#  - host_attributes: Array of Ansible attributes to lookup in the raw file, possibly in an array, and to add to the
+#     csv output.
+#  - out_of_array_attributes: Array of Ansible attributes to lookup in the raw file, at the first level of the json
+#     structure, and to add to the csv output
 #  - hostfile: The file containing the host's facts
-#  - primary_key: Array containing Ansible attributes used to build the primary key
+#  - primary_key: Array containing Ansible attributes used to build the primary key, possibly in an array, and to add
+#      to the csv output.
+#  - out_of_array_primary_key: Array of Ansible attributes used to build the primary key that sit at the first level of
+#     the json structure, and to add to the csv output
 #
 # Output parameters:
 #  - Line appended to the csv_file with host attributes extracted from Ansible
@@ -18,8 +24,9 @@
 - name: Create empty variables
   ansible.builtin.set_fact:
     primary_key_values: []
+    out_of_array_primary_key_values: []
     attribute_values: []
-    default_values: []
+    out_of_array_values: []
 
 - name: Get primary key
   ansible.builtin.set_fact:
@@ -28,6 +35,14 @@
   loop_control:
     loop_var: primary_query
 
+- name: Get out of array primary key
+  ansible.builtin.set_fact:
+    out_of_array_primary_key_values: "{{ out_of_array_primary_key_values + [jsondata | community.general.json_query(out_of_array_primary_query)] }}"
+  loop: "{{ out_of_array_primary_key }}"
+  loop_control:
+    loop_var: out_of_array_primary_query
+  when : out_of_array_primary_key is defined
+
 - name: Get host attributes
   ansible.builtin.set_fact:
     attribute_values: "{{ attribute_values + [jsondata | community.general.json_query(list_name + host_query)] }}"
@@ -35,7 +50,35 @@
   loop_control:
     loop_var: host_query
 
-- name: Apppend result to output file with no default values
+- name: Get out of array attributes
+  ansible.builtin.set_fact:
+    out_of_array_values: "{{ out_of_array_values + [jsondata | community.general.json_query(out_of_array_query)] }}"
+  loop: "{{ out_of_array_attributes }}"
+  loop_control:
+    loop_var: out_of_array_query
+  when: out_of_array_attributes is defined
+
+- name: Apppend result to output file with no out_of_array values
   ansible.builtin.lineinfile:
     path: "{{ csv_file }}"
     line: "{{ primary_key_values | join('_') }};{{ attribute_values | join(';') }}"
+  when: ((out_of_array_primary_key is undefined) and (out_of_array_attributes is undefined))
+
+- name: Apppend result to output file with out_of_array_atributes values (only)
+  ansible.builtin.lineinfile:
+    path: "{{ csv_file }}"
+    line: "{{ primary_key_values | join('_') }};{{ attribute_values | join(';') }};{{ out_of_array_values | join(';') }}"
+  when: ((out_of_array_primary_key is undefined) and (out_of_array_attributes is defined))
+
+- name: Apppend result to output file with out_of_array_atributes values (only)
+  ansible.builtin.lineinfile:
+    path: "{{ csv_file }}"
+    line: "{{ primary_key_values | join('_') }}_{{ out_of_array_primary_key_values | join('_') }};{{ attribute_values | join(';') }}"
+  when: ((out_of_array_primary_key is defined) and (out_of_array_attributes is undefined))
+
+- name: Apppend result to output file with out_of_array_atributes values (only)
+  ansible.builtin.lineinfile:
+    path: "{{ csv_file }}"
+    line: "{{ primary_key_values | join('_') }}_{{ out_of_array_primary_key_values | join('_') }};{{ attribute_values | join(';') }};{{ out_of_array_values | join(';') }}"
+  when: ((out_of_array_primary_key is defined) and (out_of_array_attributes is defined))
+
