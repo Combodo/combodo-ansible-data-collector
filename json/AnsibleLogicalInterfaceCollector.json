@@ -1,6 +1,6 @@
 {
-	"name": "$prefix$:LogicalInterface",
-	"description": "$prefix$ Data Collector (v. $version$): Logical Interfaces",
+	"name": "$ansiblelogicalinterface_synchro_name$",
+	"description": "Discovery of Logical Interfaces by Ansible collector (v. $version$)",
 	"status": "$synchro_status$",
 	"user_id": "$synchro_user$",
 	"notify_contact_id": "$contact_to_notify$",

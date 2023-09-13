@@ -1,6 +1,6 @@
 {
-	"name": "$prefix$:PhysicalInterface",
-	"description": "$prefix$ Data Collector (v. $version$): Physical Interfaces",
+	"name": "$ansiblephysicalinterface_synchro_name$",
+	"description": "Discovery of Physical Interfaces by Ansible collector (v. $version$)",
 	"status": "$synchro_status$",
 	"user_id": "$synchro_user$",
 	"notify_contact_id": "$contact_to_notify$",

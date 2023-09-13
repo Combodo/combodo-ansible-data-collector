@@ -1,6 +1,6 @@
 {
-	"name": "$prefix$:Model",
-	"description": "$prefix$ Data Collector (v. $version$): Models",
+	"name": "$ansiblemodel_synchro_name$",
+	"description": "Discovery of Models by Ansible collector (v. $version$)",
 	"status": "$synchro_status$",
 	"user_id": "$synchro_user$",
 	"notify_contact_id": "$contact_to_notify$",

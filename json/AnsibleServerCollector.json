@@ -1,6 +1,6 @@
 {
-	"name": "$prefix$:Server",
-	"description": "$prefix$ Data Collector (v. $version$): Physical Servers running an Hypervisor",
+	"name": "$ansibleserver_synchro_name$",
+	"description": "Discovery of Servers by Ansible collector (v. $version$)",
 	"status": "$synchro_status$",
 	"user_id": "$synchro_user$",
 	"notify_contact_id": "$contact_to_notify$",

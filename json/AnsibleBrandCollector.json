@@ -1,6 +1,6 @@
 {
-	"name": "$prefix$:Brand",
-	"description": "$prefix$ Data Collector (v. $version$): Brands",
+	"name": "$ansiblebrand_synchro_name$",
+	"description": "Discovery of Brands by Ansible collector (v. $version$)",
 	"status": "$synchro_status$",
 	"user_id": "$synchro_user$",
 	"notify_contact_id": "$contact_to_notify$",

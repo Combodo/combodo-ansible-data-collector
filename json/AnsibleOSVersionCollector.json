@@ -1,6 +1,6 @@
 {
-	"name": "$prefix$:OSVersion",
-	"description": "$prefix$ Data Collector (v. $version$): OSVersion",
+	"name": "$ansibleosversion_synchro_name$",
+	"description": "Discovery of OS Versions by Ansible collector (v. $version$)",
 	"status": "$synchro_status$",
 	"user_id": "$synchro_user$",
 	"notify_contact_id": "$contact_to_notify$",

@@ -1,6 +1,6 @@
 {
-	"name": "$prefix$:VirtualMachine",
-	"description": "$prefix$ Data Collector (v. $version$): Virtual Machines",
+	"name": "$ansiblevirtualmachine_synchro_name$",
+	"description": "Discovery of Virtual Machines by Ansible collector (v. $version$)",
 	"status": "$synchro_status$",
 	"user_id": "$synchro_user$",
 	"notify_contact_id": "$contact_to_notify$",
