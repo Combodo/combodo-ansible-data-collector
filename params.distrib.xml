@@ -231,10 +231,19 @@
   <!-- Synchronization parameters -->
   <contact_to_notify></contact_to_notify>
   <synchro_user></synchro_user>
+  <name_prefix>Ansible</name_prefix>
+  <name_postfix>Discovery</name_postfix>
   <json_placeholders type="hash">
-    <prefix>Ansible</prefix>
-    <full_load_interval>604800</full_load_interval><!-- 7 days (in seconds): 7*24*60*60 -->
+    <ansiblebrand_synchro_name>$name_prefix$ Brand $name_postfix$</ansiblebrand_synchro_name>
+    <ansiblelogicalinterface_synchro_name>$name_prefix$ Logical Interface $name_postfix$</ansiblelogicalinterface_synchro_name>
+    <ansiblemodel_synchro_name>$name_prefix$ Model $name_postfix$</ansiblemodel_synchro_name>
+    <ansibleosfamilies_synchro_name>$name_prefix$ OS Families $name_postfix$</ansibleosfamilies_synchro_name>
+    <ansibleosversion_synchro_name>$name_prefix$ OS Versions $name_postfix$</ansibleosversion_synchro_name>
+    <ansiblephysicalinterface_synchro_name>$name_prefix$ Physical Interface $name_postfix$</ansiblephysicalinterface_synchro_name>
+    <ansibleserver_synchro_name>$name_prefix$ Server $name_postfix$</ansibleserver_synchro_name>
+    <ansiblevirtualmachine_synchro_name>$name_prefix$ Virtual Machine $name_postfix$</ansiblevirtualmachine_synchro_name>
     <synchro_status>production</synchro_status>
+    <full_load_interval>604800</full_load_interval><!-- 7 days (in seconds): 7*24*60*60 -->
   </json_placeholders>
 
   <!-- Mapping tables -->
