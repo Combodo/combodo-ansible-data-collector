@@ -182,31 +182,31 @@
     <!-- Brand -->
     <collector>
       <name>AnsibleBrandCollector</name>
-      <enable>no</enable>
+      <enable>yes</enable>
       <rank>1</rank>
     </collector>
     <!-- Model -->
     <collector>
       <name>AnsibleModelCollector</name>
-      <enable>no</enable>
+      <enable>yes</enable>
       <rank>2</rank>
     </collector>
     <!-- OS Family -->
     <collector>
       <name>AnsibleOSFamilyCollector</name>
-      <enable>no</enable>
+      <enable>yes</enable>
       <rank>3</rank>
     </collector>
     <!-- OS Version -->
     <collector>
       <name>AnsibleOSVersionCollector</name>
-      <enable>no</enable>
+      <enable>yes</enable>
       <rank>4</rank>
     </collector>
     <!-- Server -->
     <collector>
       <name>AnsibleServerCollector</name>
-      <enable>no</enable>
+      <enable>yes</enable>
       <rank>5</rank>
     </collector>
     <!-- VirtualMachine -->
@@ -217,7 +217,7 @@
     </collector>
    <collector>
       <name>AnsibleVirtualMachineCollector</name>
-      <enable>no</enable>
+      <enable>yes</enable>
       <rank>7</rank>
     </collector>
     <!-- LogicalInterface -->
