@@ -1,4 +1,4 @@
-# iTop Data Collector for Ansible
+# Combodo Data Collector for Ansible
 
 ## About
 
